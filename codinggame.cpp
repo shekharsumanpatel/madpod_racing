@@ -11,8 +11,8 @@ using namespace std;
  * Auto-generated code below aims at helping you parse
  * the standard input according to the problem statement.
  **/
-void changeThrustVal(int &thrust, int next_checkpoint_dist, int minThreshVal){
-    if( next_checkpoint_dist < 13 ){
+void changeThrustVal(int &thrust, int next_checkpoint_dist){
+    if( next_checkpoint_dist <= 600 ){
         thrust = 0;
     }
 }
@@ -29,6 +29,18 @@ void changeThrustValBasedOnAngle(int next_checkpoint_angle, int &thrust){
     thrust = (int)100*fract;
 }
 
+float calcEuclideanDistance(int x_1, int y_1, int x_2, int y_2){
+    float EuclidDist = pow(pow(x_1-x_2,2) + pow(y_1-y_2,2),0.5);
+    return EuclidDist;
+
+}
+
+void attackOtherPod(int x, int y, int opponent_x, int opponent_y, int &thrust ){
+    float dist = calcEuclideanDistance(x,y,opponent_x,opponent_y);
+    if(dist<1000){
+        thrust = 100;
+    }
+}
 
 int main()
 { int boost_number = 0;
@@ -59,10 +71,10 @@ int main()
         // You have to output the target position
         // followed by the power (0 <= thrust <= 100)
         // i.e.: "x y thrust"
-        if(last_checkPoint_x != next_checkpoint_x || last_checkpoint_y != next_checkpoint_x){
-            last_next_checkpoint_distnce = next_checkpoint_dist;
-            calcMinThreshVal(last_next_checkpoint_distnce, minThreshVal);
-        }
+        // if(last_checkPoint_x != next_checkpoint_x || last_checkpoint_y != next_checkpoint_x){
+        //     last_next_checkpoint_distnce = next_checkpoint_dist;
+        //     calcMinThreshVal(last_next_checkpoint_distnce, minThreshVal);
+        // }
         
         if (next_checkpoint_angle > 90 || next_checkpoint_angle < -90){
             thrust = 0;
@@ -72,8 +84,10 @@ int main()
             thrust = 100;
         }
 
-        changeThrustVal(thrust, next_checkpoint_dist, minThreshVal);
-
+        changeThrustVal(thrust, next_checkpoint_dist);
+        
+        attackOtherPod(x,y,opponent_x,opponent_y,thrust);
+        
         if(boost_number != 0){
             cout << next_checkpoint_x << " " << next_checkpoint_y << " " <<thrust<< endl;
         }
