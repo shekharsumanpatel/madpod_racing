@@ -12,7 +12,7 @@ using namespace std;
  * the standard input according to the problem statement.
  **/
 void changeThrustVal(int &thrust, int next_checkpoint_dist){
-    if( next_checkpoint_dist < 100 ){
+    if( next_checkpoint_dist < 595 ){
         thrust = 0;}
 }
 
@@ -33,17 +33,37 @@ float calcEuclideanDistance(int x_1, int y_1, int x_2, int y_2){
 
 void attackOtherPod(int x, int y, int opponent_x, int opponent_y, int &thrust ){
     float dist = calcEuclideanDistance(x,y,opponent_x,opponent_y);
-    if(dist<810){
+    if(dist<1000){
         thrust = 100;
+    }
+}
+
+void angleOfCollision(int x, int y, int opponent_x, int opponent_y, int next_checkpoint_x, int next_checkpoint_y, int next_checkpoint_dist, int &thrust) {
+    float dist_own_next_checkpoint = (float)next_checkpoint_dist;
+    float dist_opponent_next_checkpoint = calcEuclideanDistance(opponent_x,opponent_y, next_checkpoint_x, next_checkpoint_y);
+    float dist_own_opponent = calcEuclideanDistance(x,y,opponent_x,opponent_y);
+
+    float angle_coll = acos((pow(dist_own_next_checkpoint,2) + pow(dist_opponent_next_checkpoint,2) - pow(dist_own_opponent,2))/(2*dist_own_next_checkpoint*dist_opponent_next_checkpoint));
+
+    if (angle_coll > 30){
+        thrust = 100;
+    }
+    else{
+        thrust = 0;
     }
 }
 
 void circleOfAttack(int x, int y, int opponent_x, int opponent_y, int next_checkpoint_x, int next_checkpoint_y, int next_checkpoint_dist, int &thrust ){
     float opponent_circle_radius = calcEuclideanDistance(opponent_x,opponent_y, next_checkpoint_x, next_checkpoint_y);
-    if(opponent_circle_radius > next_checkpoint_dist && next_checkpoint_dist <600){
-        thrust = 0;
+    if(opponent_circle_radius > next_checkpoint_dist && next_checkpoint_dist <650){
+        angleOfCollision(x,y,opponent_x,opponent_y,next_checkpoint_x,next_checkpoint_y, next_checkpoint_dist, thrust);
+    }
+    else if (opponent_circle_radius < next_checkpoint_dist){
+        attackOtherPod(x,y,opponent_x, opponent_y, thrust);
     }
 }
+
+
 
 int main()
 { int boost_number = 0;
@@ -78,21 +98,25 @@ int main()
         //     last_next_checkpoint_distnce = next_checkpoint_dist;
         //     calcMinThreshVal(last_next_checkpoint_distnce, minThreshVal);
         // }
+        
         int angle_abs = abs(next_checkpoint_angle);
-        if(angle_abs < 90 && next_checkpoint_dist > 650){
+        if(angle_abs < 90 && next_checkpoint_dist >= 600 ){
             changeThrustValBasedOnAngle(angle_abs, thrust);
         }
-        else if(angle_abs >= 90 && next_checkpoint_dist < 650){
+        else if (angle_abs > 90 && next_checkpoint_dist <650){
             thrust = 0;
+        }
+        else if( angle_abs < 90 && next_checkpoint_dist < 600){
+            thrust = 100;
         }
         else{
             thrust = 0;
         }
-        cerr<<"angle abs = "<<angle_abs<<endl;
+        // cerr<<"angle abs = "<<angle_abs<<endl;
 
         changeThrustVal(thrust, next_checkpoint_dist);
         
-        attackOtherPod(x,y,opponent_x,opponent_y,thrust);
+        // attackOtherPod(x,y,opponent_x,opponent_y,thrust);
 
         circleOfAttack(x,y,opponent_x, opponent_y, next_checkpoint_x, next_checkpoint_y,next_checkpoint_dist,thrust);
         
