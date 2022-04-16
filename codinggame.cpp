@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <math.h>
+#include <map>
 
 using namespace std;
 
@@ -12,7 +13,7 @@ using namespace std;
  * the standard input according to the problem statement.
  **/
 void changeThrustVal(int &thrust, int next_checkpoint_dist){
-    if( next_checkpoint_dist < 595 ){
+    if( next_checkpoint_dist < 650 ){
         thrust = 0;}
 }
 
@@ -20,9 +21,9 @@ void calcMinThreshVal( int total_dist_next_checkpoint, int &minThreshVal){
     minThreshVal = 0.05*total_dist_next_checkpoint;
 }
 
-void changeThrustValBasedOnAngle(int next_checkpoint_angle, int &thrust){
-    float fract = 1 - pow((next_checkpoint_angle/90),3) ;
-    thrust = (int)100*fract;
+int changeThrustValBasedOnAngle(int next_checkpoint_angle){
+    float fract = 1 - pow((next_checkpoint_angle/90),31);
+    return (int)100*fract;
 }
 
 float calcEuclideanDistance(int x_1, int y_1, int x_2, int y_2){
@@ -33,7 +34,7 @@ float calcEuclideanDistance(int x_1, int y_1, int x_2, int y_2){
 
 void attackOtherPod(int x, int y, int opponent_x, int opponent_y, int &thrust ){
     float dist = calcEuclideanDistance(x,y,opponent_x,opponent_y);
-    if(dist<1000){
+    if(dist<810){
         thrust = 100;
     }
 }
@@ -45,11 +46,8 @@ void angleOfCollision(int x, int y, int opponent_x, int opponent_y, int next_che
 
     float angle_coll = acos((pow(dist_own_next_checkpoint,2) + pow(dist_opponent_next_checkpoint,2) - pow(dist_own_opponent,2))/(2*dist_own_next_checkpoint*dist_opponent_next_checkpoint));
 
-    if (angle_coll > 30){
+    if (abs(angle_coll) > 30){
         thrust = 100;
-    }
-    else{
-        thrust = 0;
     }
 }
 
@@ -72,6 +70,12 @@ int main()
   int last_checkpoint_y = 0;
   int last_next_checkpoint_distnce = 0;
   int thrust = 80;
+
+  map<int, int> angle_to_thrust;
+
+  for ( int i = 0 ; i < 90 ; i++){
+      angle_to_thrust[i] = changeThrustValBasedOnAngle(i);
+  }
 
     // game loop
     while (1) {
@@ -101,7 +105,7 @@ int main()
         
         int angle_abs = abs(next_checkpoint_angle);
         if(angle_abs < 90 && next_checkpoint_dist >= 600 ){
-            changeThrustValBasedOnAngle(angle_abs, thrust);
+            thrust = angle_to_thrust[angle_abs];
         }
         else if (angle_abs > 90 && next_checkpoint_dist <650){
             thrust = 0;
