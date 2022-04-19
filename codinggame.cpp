@@ -49,7 +49,10 @@ int main()
     bool boost = false;
     set<int> dist_bw_checkpoint;
     int count_of_iter = 0;
-    int max_checkpoint_dist = 0;
+    int num_of_iter_max_dist = 7;
+    int max_checkpoint_dist = pow(10,5);
+    float fract_max_dist_boost_act = 0.75;
+    int angle_thresh_boost_act = 30;
 
     // game loop
     while (1) {
@@ -66,16 +69,20 @@ int main()
             cerr<<" thrust val = "<<thrust<<endl;
         }
 
+        cerr<<" Bosst Value "<<boost<<endl;
+        cerr<<" count of iter"<<count_of_iter<<endl;
+        cerr<<"next_checkpoint_x"<<next_checkpoint_x<<endl;
+        cerr<<"next_checkpoint_y"<<next_checkpoint_y<<endl;
         
         if(boost == false){
             if(last_checkpoint_x != next_checkpoint_x || last_checkpoint_y != next_checkpoint_y){
                 dist_bw_checkpoint.insert(next_checkpoint_dist);
                 count_of_iter++;
             }
-            if(count_of_iter>10){
+            if(count_of_iter>num_of_iter_max_dist){
                 max_checkpoint_dist = *dist_bw_checkpoint.rbegin();
             }
-            if(next_checkpoint_dist == max_checkpoint_dist){
+            if(next_checkpoint_dist >= fract_max_dist_boost_act*max_checkpoint_dist && abs(next_checkpoint_angle) <angle_thresh_boost_act){
                 thrust = -1;
                 boost = true;
             }
