@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <math.h>
 #include <set>
+#include<map>
 
 using namespace std;
 
@@ -22,8 +23,7 @@ void printCommand(int next_checkpoint_x, int next_checkpoint_y, int thrust){
 }
 
 int angleToThrust(int next_checkpoint_angle, int max_angle, int power_val){
-    int abs_angle = abs(next_checkpoint_angle);
-    float fract = 1 - pow(abs_angle/max_angle, power_val);
+    float fract = 1 - pow(next_checkpoint_angle/max_angle, power_val);
     return (int)100*fract;
 
 }
@@ -53,15 +53,24 @@ int main()
     int max_checkpoint_dist = pow(10,5);
     float fract_max_dist_boost_act = 0.75;
     int angle_thresh_boost_act = 30;
+    map<int,int> map_val_angle_to_thrust;
+    int max_angle_for_angle_thrust_calc = 90;
+    int power_val_angle_thrust_calc = 3;
+    int abs_angle;
+
+    for(int i = 0; i < 90; i++){
+        map_val_angle_to_thrust[i] = angleToThrust(i,max_angle_for_angle_thrust_calc,power_val_angle_thrust_calc);
+    }
 
     // game loop
     while (1) {
         cin >> x >> y >> next_checkpoint_x >> next_checkpoint_y >> next_checkpoint_dist >> next_checkpoint_angle; cin.ignore();
         cin >> opponent_x >> opponent_y; cin.ignore();
 
-        if(next_checkpoint_angle<90){
-            
-            thrust = angleToThrust(next_checkpoint_angle,90,3);
+        abs_angle = abs(next_checkpoint_angle);
+
+        if(abs_angle<90){
+            thrust = map_val_angle_to_thrust[abs_angle];
             cerr<<" thrust val = "<<thrust<<endl;
         }
         else{
@@ -73,7 +82,7 @@ int main()
         cerr<<" count of iter"<<count_of_iter<<endl;
         cerr<<"next_checkpoint_x"<<next_checkpoint_x<<endl;
         cerr<<"next_checkpoint_y"<<next_checkpoint_y<<endl;
-        
+
         if(boost == false){
             if(last_checkpoint_x != next_checkpoint_x || last_checkpoint_y != next_checkpoint_y){
                 dist_bw_checkpoint.insert(next_checkpoint_dist);
@@ -82,7 +91,7 @@ int main()
             if(count_of_iter>num_of_iter_max_dist){
                 max_checkpoint_dist = *dist_bw_checkpoint.rbegin();
             }
-            if(next_checkpoint_dist >= fract_max_dist_boost_act*max_checkpoint_dist && abs(next_checkpoint_angle) <angle_thresh_boost_act){
+            if(next_checkpoint_dist >= fract_max_dist_boost_act*max_checkpoint_dist && abs_angle <angle_thresh_boost_act){
                 thrust = -1;
                 boost = true;
             }
